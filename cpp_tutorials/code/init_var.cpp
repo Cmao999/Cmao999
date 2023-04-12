@@ -1,6 +1,26 @@
 #include<iostream>
-
+#include"init_var.h"
 using namespace std;
+
+static int global_static_int=1;//全局静态变量(常量表达式则在编译时就初始化了，非常量表达式，运行时才初始化)
+
+// 静态变量的初始化时机取决于它的声明位置和初始化方式。
+// 如果静态变量是在全局作用域内定义的(全局静态变量)，那么它在编译时被初始化。如果静态变量是在函数内部定义的(局部静态变量)，那么它在第一次调用该函数时被初始化。
+// 无论静态变量是在函数内部还是全局作用域内定义，如果它的初始值是一个编译时常量表达式，那么它在编译时就被初始化了。这种情况下，初始化发生在程序运行之前，因此可以说是编译时初始化。
+// 如果静态变量的初始值不是编译时常量表达式，那么它在运行时被初始化。这种情况下，初始化发生在程序运行时，因此可以说是运行时初始化。
+// 需要注意的是，无论是编译时初始化还是运行时初始化，静态变量只会被初始化一次。在后续的函数调用或程序运行中，静态变量的值都将保持不变。
+
+#define MACRO_INT 1+2;//传统写法，宏定义，编译时初始化
+constexpr int constexpr_int=3+4;//新写法，替代宏定义的写法，编译时初始化,只支持常量表达式
+
+// 静态变量和constexpr都可以用来定义常量值，但它们有几个不同之处：
+// 可变性不同：静态变量可以是可变的，也可以是不可变的，而constexpr定义的常量是不可变的。
+// 初始化时刻不同：静态变量在程序开始时或函数被调用时被初始化，而constexpr常量在编译时就被计算出来。
+// 类型要求不同：constexpr常量必须是字面值类型，而静态变量可以是任何类型。
+// 存储方式不同：静态变量在内存中有实际的存储空间，而constexpr常量在编译时就被替换成其值，因此不会有存储空间。
+// 总的来说，如果需要一个可变的常量值，可以使用静态变量；如果需要一个不可变的常量值，并且需要在编译时计算，可以使用constexpr常量。此外，静态变量也可以用于存储在程序运行期间需要保持不变的值，例如计数器、状态标志等。
+
+extern int global_int;//9
 
 namespace custom_var{
     void test(){
@@ -37,7 +57,25 @@ namespace custom_var{
         cout<<endl;
 
         //(3)nullptr替代NULL
+        cout<<"(3)nullptr替代NULL"<<endl;
         char* p=nullptr;
+
+        //(4)extern全局变量
+        cout<<"(4)extern全局变量"<<endl;
+        cout<<"global_int="<<global_int<<endl;
+
+        //(5)constexpr:替代宏定义的写法，编译时初始化,只支持常量表达式
+        cout<<"(5)constexpr:替代宏定义的写法，编译时初始化,只支持常量表达式"<<endl;
+        cout<<"constexpr_int="<<constexpr_int<<endl;
+
+        //(6)static:全局静态变量和局部静态变量，常量一般直接用constexpr了
+        cout<<"(6.1)全局静态变量(常量表达式则在编译时就初始化了，非常量表达式，运行时才初始化)"<<endl;
+        cout<<"global_static_int"<<global_static_int<<endl;
+        
+        cout<<"(6.2)局部静态变量(在第一次调用函数时才被初始化)"<<endl;
+        static int static_int=9;
+        cout<<"static_int"<<static_int<<endl;
+
     }
 }
 
@@ -55,20 +93,21 @@ namespace classType{
         // Time()=delete;  //禁用默认构造函数
         Time():hour(0),minute(0),second(0){}
         Time(int hour,int minute,int second):hour(hour),minute(minute),second(second){
-            cout<<"调用Time::Time(int hour,int minute,int second)这个构造函数"<<endl;
+            // cout<<"调用Time::Time(int hour,int minute,int second)这个构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
         Time(int):hour(0),minute(0),second(0){
-            cout<<"调用Time::Time(int)这个构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
 
         explicit Time(string):hour(0),minute(0),second(0){
-            cout<<"调用explicit Time::Time(string)这个构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
 
         // 拷贝构造函数，编译器默认提供，此处自己重写(原有拷贝构造函数消失)
         Time(const Time &time){
             *this=time;
-            cout<<"调用Time::Time(const Time &time)这个拷贝构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个拷贝构造函数"<<endl;
         }
 
         // 析构函数，编译器默认提供
@@ -81,7 +120,7 @@ namespace classType{
     int Time::static_id=1;//注意静态变量类外定义还需要重新申明类型,不然报错！
 
     void test(){
-        cout<<"--classType--"<<endl;
+        cout<<endl<<"--classType--"<<endl;
         //(1)支持多种构造写法，调用构造函数，单参构造函数注意隐式转换
         cout<<"(1)支持多种构造写法，调用构造函数"<<endl;
         Time time1(1,2,3);
@@ -118,29 +157,29 @@ namespace ctor{
     class Human{
     public:
         Human(){
-            cout<<"执行了Human::Human()构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
         Human(int age){
-            cout<<"执行了Human::Human(int age)构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
     };
 
     class Man:public Human{
     public:
         Man(){
-            cout<<"Man::Man()构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
     };
 
     class Woman:public Human{
     public:
         Woman():Human(0){
-            cout<<"Woman::Woman()构造函数"<<endl;
+            cout<<"调用"<<__PRETTY_FUNCTION__<<"这个构造函数"<<endl;
         }
     };
 
     void test(){
-        cout<<"--ctor--"<<endl;
+        cout<<endl<<"--ctor--"<<endl;
         cout<<"(1)子类,父类构造函数的顺序"<<endl;
         Man* man=new Man;
         delete man;

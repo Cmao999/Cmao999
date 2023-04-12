@@ -153,12 +153,18 @@ namespace Polymorphism{
 
 namespace ctor_dtor{
     class Human{
+    private:
+        string type;
     public:
         Human(){
             cout<<"执行了Human::Human()构造函数"<<endl;
         }
-        Human(int age){
+        Human(string type):type(type){
             cout<<"执行了Human::Human(int age)构造函数"<<endl;
+        }
+
+        const string& get_type(){
+            return type;
         }
 
         //注意：建议父类的析构函数都写成虚函数！
@@ -171,8 +177,11 @@ namespace ctor_dtor{
 
     class Man:public Human{
     public:
-        Man(){
+        Man(){//默认调用父类的无参构造函数
             cout<<"Man::Man()构造函数"<<endl;
+        }
+        Man(string type):Human(type){//委托构造函数，使用初始化列表调用已有的构造函数(这里调用了父类的构造函数，也可以调用自己的其他构造函数,代码复用性更强)
+            cout<<"Man::Man(string type)构造函数"<<endl;
         }
         ~Man(){
             cout<<"Man::~Man()析构函数"<<endl;
@@ -190,6 +199,10 @@ namespace ctor_dtor{
         cout<<"(2)多态的析构陷阱:必须将父类析构函数写成虚函数，才能执行子类析构函数"<<endl;
         Human* man_b=new Man;//父类指针指向子类对象
         delete man_b;
+
+        cout<<"(3)子类构造传递参数给父类构造函数：初始化列表"<<endl;
+        Man man_c("Man");
+        cout<<man_c.get_type()<<endl;
     }
 }
 
